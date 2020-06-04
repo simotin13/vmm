@@ -12,6 +12,11 @@
 MODULE_LICENSE("Dual BSD/GPL");
 
 // ============================================================================
+// extern functions
+// ============================================================================
+extern void _read_cr4(unsigned long long *val);
+
+// ============================================================================
 // function prototype
 // ============================================================================
 static int vmm_init(void);
@@ -165,6 +170,7 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
 {
     static VmmCtrl vmmCtrl;
     int ret;
+	unsigned long long val = 0;
 
     printk(KERN_DEBUG "%s in.", __FUNCTION__);
 
@@ -177,9 +183,10 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
 
     switch(cmd) {
     case VMM_READ_REG:
-        //_read_cr4(&val);
-        //printk(KERN_DEBUG "cr4 val:[%llx]", val);
-        vmmCtrl.val = 0x1234;
+    	//val = read_cr0();
+    	_read_cr4(&val);
+        printk(KERN_DEBUG "cr4 val:[0x%llx]", val);
+        vmmCtrl.val = val;
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
         if (ret != 0) {
             ret = -EFAULT;
