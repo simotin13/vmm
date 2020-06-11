@@ -168,6 +168,7 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
     static VmmCtrl vmmCtrl;
     int ret;
     unsigned long long val = 0;
+    unsigned int b32Val;
 
     printk(KERN_DEBUG "%s in.", __FUNCTION__);
 
@@ -197,7 +198,10 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
         }
         break;
     case VMM_WRITE_CR4:
-        _write_cr4(vmmCtrl.val);
+        b32Val = vmmCtrl.val;
+        printk(KERN_DEBUG "_write_cr4 b32Val:[0x%X]\n", b32Val);
+        _write_cr4(b32Val);
+        ret = 0;
         break;
     case VMM_READ_MSR:
         val = _read_msr(vmmCtrl.addr);
@@ -208,15 +212,19 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
         }
         break;
     case VMM_VMXOFF:
-        printk(KERN_DEBUG "vmxoff called\n", val);
-        _vmxoff();
-        ret = 0;
+        val = _vmxoff();
+        ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+        if (ret != 0) {
+            ret = -EFAULT;
+        }
         break;
     case VMM_VMXON:
-        printk(KERN_DEBUG "vmxon called\n", val);
         val = _vmxon();
         vmmCtrl.val = val;
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+        break;
+    default:
+        printk(KERN_DEBUG "Unknown cmd:[0x%X] called.\n", cmd);
         break;
     }
 
