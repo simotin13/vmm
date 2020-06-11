@@ -155,6 +155,7 @@ static ssize_t vmm_read(struct file *fp, char __user *buf, size_t count, loff_t 
             break;
         }
     }
+
     if (retval == 0) {
         retval = count;
     }
@@ -175,7 +176,7 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
         return -EFAULT;
     }
 
-    printk(KERN_DEBUG "cmd:[0x%02X], val:[0x%llX]\n", cmd, vmmCtrl.val);
+    printk(KERN_DEBUG "cmd:[0x%02X], addr:[0x%llX] val:[0x%llX]\n", cmd, vmmCtrl.addr, vmmCtrl.val);
 
     switch(cmd) {
     case VMM_READ_CR0:
@@ -197,6 +198,26 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
         break;
     case VMM_WRITE_CR4:
         _write_cr4(vmmCtrl.val);
+        break;
+    case VMM_READ_MSR:
+        val = _read_msr(vmmCtrl.addr);
+        vmmCtrl.val = val;
+        ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+        if (ret != 0) {
+            ret = -EFAULT;
+        }
+        break;
+    case VMM_VMXOFF:
+        printk(KERN_DEBUG "vmxoff called\n", val);
+        _vmxoff();
+        ret = 0;
+        break;
+    case VMM_VMXON:
+        printk(KERN_DEBUG "vmxon called\n", val);
+        val = _vmxon();
+        vmmCtrl.val = val;
+        ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+        break;
     }
 
     return ret;

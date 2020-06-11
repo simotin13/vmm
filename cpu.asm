@@ -7,6 +7,13 @@ global _read_cr4
 global _write_cr4
 global _write_cr0
 
+global _read_msr
+
+global _cpuid_eax
+global _cpuid_ebx
+global _cpuid_ecx
+global _cpuid_edx
+
 _vmxon:
     vmxon [rdi]
     jbe _vmx_failure
@@ -42,4 +49,56 @@ _write_cr0:
 
 _write_cr4:
     mov cr4, rdi
+    ret
+
+_read_msr:
+    push rcx
+    mov ecx, edi
+    rdmsr
+    mov ebx, edx
+    shl rbx, 32
+    or rax, rbx
+    pop rcx
+    ret
+
+; =============================================================================
+; CPUID
+; =============================================================================
+_cpuid_eax:
+    xor rax, rax
+    xor rbx, rbx
+    xor rcx, rcx
+    xor rdx, rdx
+    mov eax, edi
+    cpuid
+    ret
+
+_cpuid_ebx:
+    xor rax, rax
+    xor rbx, rbx
+    xor rcx, rcx
+    xor rdx, rdx
+    mov eax, edi
+    cpuid
+    mov eax, ebx
+    ret
+
+_cpuid_ecx:
+    xor rax, rax
+    xor rbx, rbx
+    xor rcx, rcx
+    xor rdx, rdx
+    mov eax, edi
+    cpuid
+    mov eax, ecx
+    ret
+
+_cpuid_edx:
+    xor rax, rax
+    xor rbx, rbx
+    xor rcx, rcx
+    xor rdx, rdx
+    mov eax, edi
+    cpuid
+    mov eax, edx
     ret
