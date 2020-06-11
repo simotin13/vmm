@@ -9,8 +9,8 @@ extern int _vmxoff(void);
 
 extern unsigned long _read_cr0(void);
 extern unsigned long _read_cr4(void);
-extern void _write_cr0(unsigned long);
-extern void _write_cr4(unsigned long);
+extern void _write_cr0(unsigned int);
+extern void _write_cr4(unsigned int);
 
 extern unsigned long _read_msr(unsigned int);
 
