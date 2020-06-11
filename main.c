@@ -6,57 +6,31 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 
+#include "log.h"
 #include "cpu.h"
-#include "cpuinfo.h"
 #include "kernelmod.h"
+#include "vmx.h"
 
 int main(int argc, char **argv){
-    bool bRet;
-    int fd;
     int ret;
-    unsigned int reg;
-	VmmCtrl ctrl;
 
-    bRet = is_vmx_enable();
-    if (bRet != true) {
-        fprintf(stderr, "VMX is not supported\n");
-        close(fd);
+    // check if vmx enable
+    ret = is_vmx_enable();
+    if (ret == 0) {
+        ERROR_LOG("VMX is not supported in this CPU...");
         return -1;
     }
 
-    fd = open("/dev/vmm0", O_RDWR);
-    if (fd < 0) {
-        fprintf(stderr, "/dev/vmm0 open failed\n");
+    // open vmx kernel module device file
+    ret = open_vmx_mod();
+    if (ret < 0) {
+        ERROR_LOG("open_mod failed:[%d]\n", ret);
         return -1;
     }
 
-    ret = ioctl(fd, VMM_READ_CR4, &ctrl);
-    if (ret != 0) {
-        fprintf(stderr, "ret:[%d]\n", ret);
-        close(fd);
-        return -1;
-    }
-    reg = ctrl.val;
+    reset_vmx();
 
-    // BIT13 VMXE
-    ctrl.val = reg | 0x2000;
-    ret = ioctl(fd, VMM_WRITE_CR4, &ctrl);
-    if (ret != 0) {
-        fprintf(stderr, "ret:[%d]\n", ret);
-        close(fd);
-        return -1;
-    }
-
-    fprintf(stdout, "vmxoff");
-	ctrl.val = 0xFF;
-	ret = ioctl(fd, VMM_VMXOFF, &ctrl);
-	if (ret != 0) {
-		fprintf(stderr, "ret:[%d]\n", ret);
-		close(fd);
-		return -1;
-	}
-	fprintf(stdout, "ret:[0x16%llx]\n", ctrl.val);
-
-    close(fd);
+    // close vmx kernel module device file
+    close_vmx_mod();
     return 0;
 }
