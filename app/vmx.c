@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -20,14 +21,16 @@
 #define CR4_MASK_VMXE                   (0x2000)
 #define CR4_BIT_VMXE                    (13)
 
-static int s_fd;
-
 #define VMX_DEV_FILE_PATH   "/dev/vmm0"
+
+static int s_fd;
+static uint8_t s_rev_id[1024];
 
 int open_vmx_mod(void)
 {
     TRACE_LOG("%s in.", __FUNCTION__);
-    int s_fd = open(VMX_DEV_FILE_PATH, O_RDWR);
+    s_fd = open(VMX_DEV_FILE_PATH, O_RDWR);
+    DEBUG_LOG("s_fd:%d", s_fd);
     if (s_fd < 0) {
         ERROR_LOG("%s open failed", VMX_DEV_FILE_PATH);
         return -1;
@@ -49,6 +52,7 @@ int reset_vmx(void)
     VmmCtrl ctrl;
 
     TRACE_LOG("%s in.", __FUNCTION__);
+    DEBUG_LOG("s_fd:%d", s_fd);
 
     ret = ioctl(s_fd, VMM_READ_CR4, &ctrl);
     if (ret != 0) {
@@ -63,8 +67,52 @@ int reset_vmx(void)
     return 0;
 }
 
-int is_vmx_enable(void)
+int enable_vmx(void)
 {
-  int reg = _cpuid_ecx(CPUID_IDX_FEATURE_FLAGS);
-  return (reg & CPUID_FEATURE_FLAGS_MASK_VMX) >> CPUID_FEATURE_FLAGS_BIT_VMX;
+    int ret;
+    int reg;
+    VmmCtrl ctrl;
+
+    TRACE_LOG("%s in.", __FUNCTION__);
+    DEBUG_LOG("s_fd:%d", s_fd);
+
+    // read current cr4 value
+    ret = ioctl(s_fd, VMM_READ_CR4, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+
+    // set VMX enable bit
+    ctrl.val = ctrl.val | CR4_MASK_VMXE;
+    ret = ioctl(s_fd, VMM_WRITE_CR4, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+
+    return 0;
+}
+
+int is_vmx_supported(void)
+{
+    int reg = _cpuid_ecx(CPUID_IDX_FEATURE_FLAGS);
+    return (reg & CPUID_FEATURE_FLAGS_MASK_VMX) >> CPUID_FEATURE_FLAGS_BIT_VMX;
+}
+
+int get_vmcs_rev_id(void)
+{
+    int ret;
+    VmmCtrl ctrl;
+    TRACE_LOG("%s in.", __FUNCTION__);
+    DEBUG_LOG("s_fd:%d", s_fd);
+
+    ctrl.addr = MSR_REG_ADDR_IA32_VMX_BASIC;
+    ret = ioctl(s_fd, VMM_READ_MSR, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+    DEBUG_LOG("basic:0x%llx", ctrl.val);
+    return 0;
 }

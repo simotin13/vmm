@@ -16,7 +16,7 @@ int main(int argc, char **argv){
     TRACE_LOG("vmm application started...");
 
     // check if vmx enable
-    ret = is_vmx_enable();
+    ret = is_vmx_supported();
     if (ret == 0) {
         ERROR_LOG("VMX is not supported in this CPU...");
         return -1;
@@ -30,6 +30,10 @@ int main(int argc, char **argv){
     }
 
     reset_vmx();
+
+    get_vmcs_rev_id();
+
+	enable_vmx();
 
     // close vmx kernel module device file
     close_vmx_mod();
