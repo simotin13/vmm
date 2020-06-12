@@ -94,6 +94,26 @@ int enable_vmx(void)
     return 0;
 }
 
+int setup_msr(void)
+{
+	int ret;
+    VmmCtrl ctrl;
+
+	// MSR 58(3A) のBIT2を1に設定
+    ret = ioctl(s_fd, VMM_READ_MSR, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+
+    // Enable VMX outside SMX operation bit:2
+    ctrl.val = ctrl.val | MSR_MASK_ENABLE_VMX_OUTSIDE_SMX;
+    ret = ioctl(s_fd, VMM_WRITE_MSR, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+}
 int is_vmx_supported(void)
 {
     int reg = _cpuid_ecx(CPUID_IDX_FEATURE_FLAGS);
