@@ -100,6 +100,7 @@ int setup_msr(void)
     VmmCtrl ctrl;
 
 	// MSR 58(3A) のBIT2を1に設定
+    ctrl.addr = IA32_FEATURE_CONTROL;
     ret = ioctl(s_fd, VMM_READ_MSR, &ctrl);
     if (ret != 0) {
         ERROR_LOG("ioctl failed:[%d]", ret);
@@ -107,6 +108,7 @@ int setup_msr(void)
     }
 
     // Enable VMX outside SMX operation bit:2
+    ctrl.addr = IA32_FEATURE_CONTROL;
     ctrl.val = ctrl.val | MSR_MASK_ENABLE_VMX_OUTSIDE_SMX;
     ret = ioctl(s_fd, VMM_WRITE_MSR, &ctrl);
     if (ret != 0) {
