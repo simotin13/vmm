@@ -12,11 +12,8 @@ extern unsigned long _read_cr4(void);
 extern void _write_cr0(unsigned int);
 extern void _write_cr4(unsigned int);
 
-extern unsigned long _read_msr(unsigned int);
-
-extern int _cpuid_eax(unsigned int);
-extern int _cpuid_ebx(unsigned int);
-extern int _cpuid_ecx(unsigned int);
-extern int _cpuid_edx(unsigned int);
+extern unsigned long _read_msr_low(unsigned int);
+extern unsigned long _read_msr_high(unsigned int);
+extern unsigned long long _read_msr(unsigned int);
 
 #endif	// _CPU_H_

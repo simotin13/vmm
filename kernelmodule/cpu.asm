@@ -6,13 +6,9 @@ global _read_cr0
 global _read_cr4
 global _write_cr4
 global _write_cr0
-
 global _read_msr
-
-global _cpuid_eax
-global _cpuid_ebx
-global _cpuid_ecx
-global _cpuid_edx
+global _read_msr_low
+global _read_msr_high
 
 _vmxon:
     vmxon [rdi]
@@ -61,44 +57,17 @@ _read_msr:
     pop rcx
     ret
 
-; =============================================================================
-; CPUID
-; =============================================================================
-_cpuid_eax:
-    xor rax, rax
-    xor rbx, rbx
-    xor rcx, rcx
-    xor rdx, rdx
-    mov eax, edi
-    cpuid
+_read_msr_low:
+    push rcx
+    mov ecx, edi
+    rdmsr
+    pop rcx
     ret
 
-_cpuid_ebx:
-    xor rax, rax
-    xor rbx, rbx
-    xor rcx, rcx
-    xor rdx, rdx
-    mov eax, edi
-    cpuid
-    mov eax, ebx
-    ret
-
-_cpuid_ecx:
-    xor rax, rax
-    xor rbx, rbx
-    xor rcx, rcx
-    xor rdx, rdx
-    mov eax, edi
-    cpuid
-    mov eax, ecx
-    ret
-
-_cpuid_edx:
-    xor rax, rax
-    xor rbx, rbx
-    xor rcx, rcx
-    xor rdx, rdx
-    mov eax, edi
-    cpuid
+_read_msr_high:
+    push rcx
+    mov ecx, edi
+    rdmsr
     mov eax, edx
+    pop rcx
     ret
