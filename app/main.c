@@ -8,11 +8,12 @@
 
 #include "log.h"
 #include "cpu.h"
-#include "kernelmod.h"
 #include "vmx.h"
 
 int main(int argc, char **argv){
     int ret;
+
+    TRACE_LOG("vmm application started...");
 
     // check if vmx enable
     ret = is_vmx_enable();
@@ -32,5 +33,7 @@ int main(int argc, char **argv){
 
     // close vmx kernel module device file
     close_vmx_mod();
-    return 0;
+
+    TRACE_LOG("vmm application finished...");
+   return 0;
 }
