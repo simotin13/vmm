@@ -13,13 +13,15 @@ typedef struct _VmmCtrl{
 #define IOC_MAGIC 'v'
 #define VMM_READ_CR0    _IOR(IOC_MAGIC, 0x00, VmmCtrl)
 #define VMM_READ_CR4    _IOR(IOC_MAGIC, 0x04, VmmCtrl)
+#define VMM_READ_MSR    _IOR(IOC_MAGIC, 0x05, VmmCtrl)
 #define VMM_WRITE_CR0   _IOW(IOC_MAGIC, 0x10, VmmCtrl)
 #define VMM_WRITE_CR4   _IOW(IOC_MAGIC, 0x14, VmmCtrl)
-#define VMM_READ_MSR    _IOW(IOC_MAGIC, 0x20, VmmCtrl)
+#define VMM_WRITE_MSR   _IOW(IOC_MAGIC, 0x15, VmmCtrl)
 #define VMM_VMXOFF      _IOW(IOC_MAGIC, 0x0100, VmmCtrl)
 #define VMM_VMXON       _IOW(IOC_MAGIC, 0x0101, VmmCtrl)
 
 // msr vmx related addrs
+#define IA32_FEATURE_CONTROL                        (58)
 #define MSR_REG_ADDR_IA32_VMX_BASIC                 (1152)
 #define MSR_REG_ADDR_IA32_VMX_PINBASED_CTLS         (1153)
 #define MSR_REG_ADDR_IA32_VMX_PROCBASED_CTLS        (1154)
@@ -32,4 +34,10 @@ typedef struct _VmmCtrl{
 #define MSR_REG_ADDR_IA32_VMX_CR4_FIXED1            (1161)
 #define MSR_REG_ADDR_IA32_VMX_VMCS_ENUM             (1162)
 #define MSR_REG_ADDR_IA32_VMX_VMCS_PROCBASED_CTLS2  (1163)
+
+
+// msr
+#define MSR_MASK_LOCK_IA32_FEATURE_CONTROL          (0x01)
+#define MSR_MASK_ENABLE_VMX_OUTSIDE_SMX             (0x04)
+
 #endif  // _KERNELMOD_H_

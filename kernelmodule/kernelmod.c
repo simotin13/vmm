@@ -211,6 +211,14 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
             ret = -EFAULT;
         }
         break;
+    case VMM_WRITE_MSR:
+        val = _write_msr(vmmCtrl.addr, vmmCtrl.val);
+        vmmCtrl.val = val;
+        ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+        if (ret != 0) {
+            ret = -EFAULT;
+        }
+        break;
     case VMM_VMXOFF:
         val = _vmxoff();
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
