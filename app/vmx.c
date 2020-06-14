@@ -106,6 +106,7 @@ int setup_msr(void)
         ERROR_LOG("ioctl failed:[%d]", ret);
         return ret;
     }
+	DEBUG_LOG("msr:%llx", ctrl.val);
 
     // Enable VMX outside SMX operation bit:2
     ctrl.addr = IA32_FEATURE_CONTROL;
@@ -115,6 +116,24 @@ int setup_msr(void)
         ERROR_LOG("ioctl failed:[%d]", ret);
         return ret;
     }
+
+	// Lock IA32_FEATURE_CONTROL
+    ctrl.addr = IA32_FEATURE_CONTROL;
+    ctrl.val = ctrl.val | MSR_MASK_LOCK_IA32_FEATURE_CONTROL;
+    ret = ioctl(s_fd, VMM_WRITE_MSR, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+
+    ctrl.addr = IA32_FEATURE_CONTROL;
+    ret = ioctl(s_fd, VMM_READ_MSR, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+	DEBUG_LOG("msr:%llx", ctrl.val);
+
 }
 int is_vmx_supported(void)
 {
