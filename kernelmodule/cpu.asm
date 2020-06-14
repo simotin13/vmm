@@ -9,6 +9,7 @@ global _write_cr0
 global _read_msr
 global _read_msr_low
 global _read_msr_high
+global _write_msr
 
 _vmxon:
     vmxon [rdi]
@@ -71,3 +72,17 @@ _read_msr_high:
     mov eax, edx
     pop rcx
     ret
+
+_write_msr:
+    push rcx
+    mov ecx, edi
+    mov rdx, rsi
+    mov rbx, 0xFFFFFFFF00000000
+    and rdx, rbx
+    mov rax, rsi
+    mov rbx, 0x00000000FFFFFFFF
+    and rax, rbx
+    wrmsr
+    pop rcx
+    ret
+
