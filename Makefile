@@ -1,6 +1,6 @@
 all:
-	make -C app
-	make -C kernelmodule
+	cd kernelmodule && make
+	cd app && make
 
 install_mod:
 	cd kernelmodule && ./install_mod.sh
