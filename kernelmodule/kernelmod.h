@@ -1,6 +1,7 @@
 #ifndef _KERNELMOD_H_
 #define _KERNELMOD_H_
 #include <linux/ioctl.h>
+#include "kernelenv.h"
 
 // ioctl I/F
 typedef struct _VmmCtrl{
