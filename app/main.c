@@ -33,7 +33,9 @@ int main(int argc, char **argv){
 
     get_vmcs_rev_id();
 
-	enable_vmx();
+    enable_vmx();
+
+    setup_msr();
 
     // close vmx kernel module device file
     close_vmx_mod();

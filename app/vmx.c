@@ -96,17 +96,36 @@ int enable_vmx(void)
 
 int setup_msr(void)
 {
-	int ret;
+    int ret;
     VmmCtrl ctrl;
 
-	// MSR 58(3A) のBIT2を1に設定
+    // MSR 58(3A) のBIT2を1に設定
+
     ctrl.addr = IA32_FEATURE_CONTROL;
     ret = ioctl(s_fd, VMM_READ_MSR, &ctrl);
     if (ret != 0) {
         ERROR_LOG("ioctl failed:[%d]", ret);
         return ret;
     }
-	DEBUG_LOG("msr:%llx", ctrl.val);
+    DEBUG_LOG("read msr:0x%llx", ctrl.val);
+
+    // unlock IA32_FEATURE_CONTROL
+    ctrl.addr = IA32_FEATURE_CONTROL;
+    ctrl.val = ctrl.val ^ MSR_MASK_LOCK_IA32_FEATURE_CONTROL;
+    DEBUG_LOG("write val:0x%llx", ctrl.val);
+    ret = ioctl(s_fd, VMM_WRITE_MSR, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+
+    ctrl.addr = IA32_FEATURE_CONTROL;
+    ret = ioctl(s_fd, VMM_READ_MSR, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+    DEBUG_LOG("read msr:0x%llx", ctrl.val);
 
     // Enable VMX outside SMX operation bit:2
     ctrl.addr = IA32_FEATURE_CONTROL;
@@ -117,7 +136,9 @@ int setup_msr(void)
         return ret;
     }
 
-	// Lock IA32_FEATURE_CONTROL
+    return 0;
+
+    // Lock IA32_FEATURE_CONTROL
     ctrl.addr = IA32_FEATURE_CONTROL;
     ctrl.val = ctrl.val | MSR_MASK_LOCK_IA32_FEATURE_CONTROL;
     ret = ioctl(s_fd, VMM_WRITE_MSR, &ctrl);
@@ -132,8 +153,9 @@ int setup_msr(void)
         ERROR_LOG("ioctl failed:[%d]", ret);
         return ret;
     }
-	DEBUG_LOG("msr:%llx", ctrl.val);
+    DEBUG_LOG("read msr:0x%llx", ctrl.val);
 
+    return 0;
 }
 int is_vmx_supported(void)
 {
