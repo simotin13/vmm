@@ -1,4 +1,10 @@
 app/vmm
 app/*.o
+kernelmodule/*.ko
 kernelmodule/*.o
 kernelmodule/*.d
+kernelmodule/*.cmd
+kernelmodule/Module.symvers
+kernelmodule/modules.order
+kernelmodule/.tmp_versions/
+kernelmodule/vmm.mod.c
