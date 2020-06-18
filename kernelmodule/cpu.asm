@@ -79,10 +79,10 @@ _write_msr:
     mov rdx, rsi
     mov rbx, 0xFFFFFFFF00000000
     and rdx, rbx
+    shr rdx, 32
     mov rax, rsi
     mov rbx, 0x00000000FFFFFFFF
     and rax, rbx
     wrmsr
     pop rcx
     ret
-
