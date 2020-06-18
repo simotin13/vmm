@@ -7,4 +7,5 @@ kernelmodule/*.cmd
 kernelmodule/Module.symvers
 kernelmodule/modules.order
 kernelmodule/.tmp_versions/
+kernelmodule/vmm.mod
 kernelmodule/vmm.mod.c
