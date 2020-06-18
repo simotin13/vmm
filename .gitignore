@@ -1,3 +1,5 @@
+Module.symvers
+modules.order
 app/vmm
 app/*.o
 kernelmodule/*.ko
