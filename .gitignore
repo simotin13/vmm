@@ -1,0 +1,4 @@
+app/vmm
+app/*.o
+kernelmodule/*.o
+kernelmodule/*.d
