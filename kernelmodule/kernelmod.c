@@ -150,7 +150,11 @@ static ssize_t vmm_read(struct file *fp, char __user *buf, size_t count, loff_t 
     printk(KERN_DEBUG "%s in.", __FUNCTION__);
 
     for (i = 0 ; i < count ; i++) {
+#if 0
         retval = copy_to_user(&buf[i], &val, 1);
+#else
+        retval = raw_copy_to_user(&buf[i], &val, 1);
+#endif
         if (retval != 0) {
             break;
         }
@@ -173,7 +177,12 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
     printk(KERN_DEBUG "%s in.", __FUNCTION__);
 
     memset(&vmmCtrl, 0, sizeof(VmmCtrl));
-    if (copy_from_user(&vmmCtrl, (void __user *)arg, sizeof(VmmCtrl))) {
+#if 0
+    ret = copy_from_user(&vmmCtrl, (void __user *)arg, sizeof(VmmCtrl));
+#else
+    ret = raw_copy_from_user(&vmmCtrl, (void __user *)arg, sizeof(VmmCtrl));
+#endif
+    if (ret < 0) {
         return -EFAULT;
     }
 
@@ -184,7 +193,11 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
         val = _read_cr0();
         printk(KERN_DEBUG "_read_cr0 val:[0x%llX]\n", val);
         vmmCtrl.val = val;
+#if 0
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#else
+        ret = raw_copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#endif
         if (ret != 0) {
             ret = -EFAULT;
         }
@@ -192,7 +205,11 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
     case VMM_READ_CR4:
         val = _read_cr4();
         vmmCtrl.val = val;
+#if 0
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#else
+        ret = raw_copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#endif
         if (ret != 0) {
             ret = -EFAULT;
         }
@@ -206,7 +223,11 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
     case VMM_READ_MSR:
         val = _read_msr(vmmCtrl.addr);
         vmmCtrl.val = val;
+#if 0
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#else
+        ret = raw_copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#endif
         if (ret != 0) {
             ret = -EFAULT;
         }
@@ -214,14 +235,22 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
     case VMM_WRITE_MSR:
         val = _write_msr(vmmCtrl.addr, vmmCtrl.val);
         vmmCtrl.val = val;
+#if 0
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#else
+        ret = raw_copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#endif
         if (ret != 0) {
             ret = -EFAULT;
         }
         break;
     case VMM_VMXOFF:
         val = _vmxoff();
+#if 0
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#else
+        ret = raw_copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#endif
         if (ret != 0) {
             ret = -EFAULT;
         }
@@ -229,7 +258,11 @@ static long vmm_ioctl(struct file *filep, unsigned int cmd, unsigned long arg)
     case VMM_VMXON:
         val = _vmxon();
         vmmCtrl.val = val;
+#if 0
         ret = copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#else
+        ret = raw_copy_to_user((void __user *)arg, &vmmCtrl, sizeof(VmmCtrl));
+#endif
         break;
     default:
         printk(KERN_DEBUG "Unknown cmd:[0x%X] called.\n", cmd);
