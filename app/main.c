@@ -16,16 +16,16 @@ int main(int argc, char **argv){
     TRACE_LOG("vmm application started...");
 
     // check if vmx enable
-    ret = is_vmx_supported();
-    if (ret == 0) {
-        ERROR_LOG("VMX is not supported in this CPU...");
+    ret = check_cpu_regs();
+    if (ret != 0) {
+        ERROR_LOG("register check failed:[%d]");
         return -1;
     }
 
     // open vmx kernel module device file
     ret = open_vmx_mod();
     if (ret < 0) {
-        ERROR_LOG("open_mod failed:[%d]\n", ret);
+        ERROR_LOG("open_mod failed:[%d]", ret);
         return -1;
     }
 

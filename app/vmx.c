@@ -21,6 +21,10 @@
 #define CR4_MASK_VMXE                   (0x2000)
 #define CR4_BIT_VMXE                    (13)
 
+// MSR
+#define MSR_IA32_FEATURE_CONTROL_LOCK_BIT_MASK					(0x01)
+#define MSR_IA32_FEATURE_CONTROL_ENABLE_VMXON_OUTSIDE_SMX_MASK	(0x04)
+
 #define VMX_DEV_FILE_PATH   "/dev/vmm0"
 
 static int s_fd;
@@ -157,10 +161,34 @@ int setup_msr(void)
 
     return 0;
 }
-int is_vmx_supported(void)
+
+int check_cpu_regs(void)
 {
+    int ret;
+    VmmCtrl ctrl;
     int reg = _cpuid_ecx(CPUID_IDX_FEATURE_FLAGS);
-    return (reg & CPUID_FEATURE_FLAGS_MASK_VMX) >> CPUID_FEATURE_FLAGS_BIT_VMX;
+	if (reg & CPUID_FEATURE_FLAGS_MASK_VMX == 0x00) {
+		// vmx not supported
+    	DEBUG_LOG("vmx not supported");
+		return -1;
+	}
+
+	// Check MSR IA32_FEATURE_CONTROL
+	// register has locked? → must be locked by BIOS/UEFI
+    ctrl.addr = IA32_FEATURE_CONTROL;
+    ret = ioctl(s_fd, VMM_READ_MSR, &ctrl);
+    if (ret != 0) {
+        ERROR_LOG("ioctl failed:[%d]", ret);
+        return ret;
+    }
+    DEBUG_LOG("read msr:0x%llx", ctrl.val);
+	if (ctrl.val & MSR_IA32_FEATURE_CONTROL_LOCK_BIT_MASK == 0) {
+		// Not locked
+    	DEBUG_LOG("MSR IA32_FEATURE_CONTROL not locked");
+		return -1;
+	}
+
+	return 0;
 }
 
 int get_vmcs_rev_id(void)
